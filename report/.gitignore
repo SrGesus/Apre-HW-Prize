@@ -1,0 +1,7 @@
+main.*
+!main.pdf
+!main.tex
+copy.*
+!copy.pdf
+!copy.tex
+_minted*
