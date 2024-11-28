@@ -12,7 +12,6 @@
 \usepackage{framed}
 \usepackage[dvipsnames]{xcolor}
 \usepackage[most]{tcolorbox}
-\usepackage{minted}
 \usepackage{enumitem}
 \usepackage{subcaption}
 \usepackage{csquotes}
@@ -30,14 +29,6 @@
 
 \newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
 \newcommand{\code}[1]{\texttt{#1}}
-
-\newtcbtheorem[auto counter,number within=section]{algorithm}{Algorithm}{
-  colback=LightOrange!20,
-  colframe=LightOrange,
-  colbacktitle=LightOrange,
-  fonttitle=\bfseries\color{black},
-  boxed title style={size=small,colframe=LightOrange},
-}{alg}
 
 \geometry{
   textheight=24.5cm,
@@ -57,44 +48,53 @@
 
 \begin{document}
 
-\begin{titlepage}
 \begin{center}
-  \vspace*{1cm}
-  \includegraphics[scale = 0.3]{img/IST_A.eps}
-  
-  \vspace{1.5cm}
-  {\LARGE\textsc{Aprendizagem}}
-  
-  \vspace{0.7cm}
-  {\LARGE\textsc{LEIC IST-UL}}
-  
-  \vspace{0.7cm}
+  \begin{figure}
+    \includegraphics[scale = 0.3, left]{img/IST_A.eps} % IST logo
+    \end{figure}
+  \LARGE{ \normalsize \textsc{} \\
+  [2.0cm] 
+  \LARGE{ \LARGE \textsc{Aprendizagem}} \\
+  [1cm]
+  \LARGE{ \LARGE \textsc{LEIC IST-UL}} \\
+  [1cm]
+  \HRule{1.5pt} \\
+  [0.4cm]
+  \LARGE \textbf{\uppercase{Relatório - Merit Prize Challenge}}
   \HRule{1.5pt}
-  \vspace{0.3cm}
-  {\LARGE\textbf{\uppercase{Relatório - Merit Prize Challenge}}}
-  \HRule{1.5pt}
-  
-  \vspace{2cm}
-  
+  \\ [2.5cm]
+  }
+\end{center}
+
+\begin{flushleft}
+  \textbf{\LARGE Grupo 10:}
+\end{flushleft}
+
+\begin{center}
   \begin{minipage}{0.7\textwidth}
-    \begin{flushleft}
-      \large\textbf{Group 10:}\\[0.3cm]
-      \large Gabriel Ferreira\\
-      \large Irell Zane
-    \end{flushleft}
+      \begin{flushleft}
+        \large Gabriel Ferreira \\
+        \large  Irell Zane
+      \end{flushleft}
   \end{minipage}%
   \begin{minipage}{0.3\textwidth}
-    \begin{flushright}
-      \large 107030\\
-      \large 107161
-    \end{flushright}
+      \begin{flushright}
+        \large 107030\\
+        \large 107161
+      \end{flushright}
   \end{minipage}
-  
-  \vfill
-  
-  {\large\textbf{2024/2025 -- 1st Semester, P1}}
 \end{center}
-\end{titlepage}
+
+\hfill
+
+\begin{center}
+  \vspace{4cm}
+  \date \large \bf  2024/2025 -- 1st Semester, P1
+\end{center}
+
+\setcounter{page}{0}
+\thispagestyle{empty}
+\newpage
 
 \section{Logistic Regression Analysis}
 
@@ -134,14 +134,21 @@ Our implementation of Expectation-Maximization (EM) clustering utilized \code{sc
   \end{minipage}
 \end{figure}
 
-The silhouette analysis revealed several important trends:
+The silhouette analysis revealed several important trends, see Figure \ref{fig:silhouette-score}:
 \begin{itemize}
-    \item A clear declining trend in clustering quality as the number of clusters increases
-    \item Growing disparity between training and testing silhouette scores with higher cluster counts
-    \item Optimal clustering achieved with k=2, yielding silhouette scores of 0.626 (testing) and 0.667 (training)
+  \setlength{\itemsep}{0pt}
+    \item A clear declining trend in clustering quality as the number of clusters increases;
+    \item Growing disparity between training and testing silhouette scores with
+    higher cluster counts, suggesting a loss in the generalization capacity of
+    the clustering solution;
+    \item Optimal clustering achieved with k=2, yielding silhouette scores of 0.626 (testing) and 0.667 (training);
 \end{itemize}
 
-Upon analyzing the relationship between the number of clusters 
+\setcounter{section}{3}
+
+\section{Logistic Reggression on EM Probabilities Analysis}
+
+Upon analyzing Figure \ref{fig:em-accuracy}, the relationship between the number of clusters 
 ($k$) and both performance metrics - the Silhouette scores and
 Logistic Regression accuracy on the mapped dataset - we can see
 that there is a notable relation: For low numbers of clusters,
@@ -161,45 +168,72 @@ on the logistic regression model.
 \section{RBF Network Implementation}
 
 Our Radial Basis Function (RBF) Network implementation consisted of three key layers:
+
 \begin{enumerate}
-    \item Input layer matching the dimension of observations
-    \item Hidden layer corresponding to the number of clusters
-    \item Output layer with a single neuron for binary classification
+    \item Input layer matching the dimension of observations;
+    \item Hidden layer corresponding to the number of clusters;
+    \item Output layer with a single neuron for binary classification;
 \end{enumerate}
 
-The Gaussian Radial Basis Function employed in our network is defined as:
+Before training an RBF network we need to choose a Radial Basis Function. The 
+most commonly used is the Gaussian and since we are working with EM Clustering
+it would not make sense to measure just the distance between the observation and
+the mean. We want the distance between the point of the observation and the
+distribution of cluster 1 and 2, the distance between a point and a distribution 
+is the Mahalanobis distance.
+
+The Gaussian Radial Basis Function employed in our network is thus defined as:
 \begin{equation}
   \phi_k(x)=exp(-\gamma \cdot (x-\mu)^T\Sigma_k^{-1}(x-\mu))
 \end{equation}
 
-Initial implementation with $\gamma=\frac{1}{2}$ yielded low accuracies:
+Initial implementation with the standard\footnote{ 
+  As suggested by Wichert and Sa-Couto (2021, Chapter 10)
+} 
+$\gamma=\frac{1}{2}$ yielded low accuracies:
 \begin{itemize}
-    \item Train Accuracy: 0.6256281407035176
-    \item Test Accuracy: 0.631578947368421
+    \item Train Accuracy: 62.56\%;
+    \item Test Accuracy: 63.15\%;
 \end{itemize}
-This was due to several challenges with the activation distributions:
+
+This low accuracy was due to RBF values being in wildly different scales, most of
+them too small, see Figure \ref{fig:rbf-dist-big}.
+With so many of them being near zero, and some so small that their double
+precision floating point representation is zero,
+the model is unable to learn properly, and because of this, the model
+always made the same prediction regardless of input.
 
 \begin{figure}[H]
-    \centering
-    \begin{minipage}{0.48\textwidth}
-        \includegraphics[width=\linewidth]{img/RBF_Activation_500.png}
-        \caption{Hidden layer activation distribution ($\gamma=0.5$)}
-    \end{minipage}
-    \hfill
-    \begin{minipage}{0.48\textwidth}
-        \includegraphics[width=\linewidth]{img/RBF_Activation_15.png}
-        \caption{Hidden layer activation distribution ($\gamma=0.015$)}
-    \end{minipage}
+  \centering
+  \begin{minipage}{0.48\textwidth}
+      \includegraphics[width=\linewidth]{img/RBF_Activation_500.png}
+      \caption{Hidden layer activation distribution ($\gamma=0.5$)}
+      \label{fig:rbf-dist-big}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.48\textwidth}
+      \includegraphics[width=\linewidth]{img/RBF_Activation_15.png}
+      \caption{Hidden layer activation distribution ($\gamma=0.015$)}
+      \label{fig:rbf-dist-small}
+  \end{minipage}
 \end{figure}
 
-The low accuracy was due to distances being too large, gamma being too low, and floating point precision issues. We experimented with different gamma values:
-To address these challenges, we conducted extensive experimentation with different gamma values and implemented Normalized RBF:
+To address this challenge we attempted to increase the scale by decreasing the
+gamma value, trying many different values, see Figure \ref{fig:rbf-gamma-gaus}
+and it seemed to be effective as a means to attenuate the scale
+differences, see Figure \ref{fig:rbf-dist-small}. We also considered that
+another good solution would be normalizing the results of the hidden layer,
+since this would guarantee that at least one neuron had a non near-zero value,
+meaning the regression model would be able to update its weights more
+effectively.
+
 
 \begin{figure}[H]
   \centering
   \begin{minipage}{0.48\textwidth}
     \includegraphics[width=\linewidth]{img/GammaHyperparameterTuning.png}
     \caption{RBF Network gamma parameter tuning results}
+    \label{fig:rbf-gamma-gaus}
   \end{minipage}
   \hfill
   \begin{minipage}{0.48\textwidth}
@@ -210,33 +244,41 @@ To address these challenges, we conducted extensive experimentation with differe
 
 The Normalized RBF (NRBF) implementation achieved several improvements:
 \begin{itemize}
-    \item Increased testing accuracy to 92.96\% with $\gamma=0.5$
-    \item Reduced sensitivity to gamma parameter selection
-    \item More stable and consistent performance across different configurations
-    \item Better distribution of activation values, leading to improved learning
+  \setlength{\itemsep}{0pt}
+    \item Increased testing accuracy from 92.40\% ($\gamma=0.015$) to 92.96\% with $\gamma=0.5$;
+    \item Reduced sensitivity to gamma parameter selection, meaning that the
+    standard $\gamma$ of 0.5 can be chosen, making time costly hyperparameter tuning
+    no longer a necessity;
+    \item More stable and consistent performance across different configurations;
+    \item Better distribution of activation values, leading to improved learning;
 \end{itemize}
 
-The NRBF distributions are discriminative in that there is as much small activations as there are large, (Suggesting points that are part of a cluster and points that are not):
+% The NRBF distributions are discriminative in that there is as much small
+% activations as there are large, (Suggesting points that are part of a cluster
+% and points that are not):
+%
+% \begin{figure}[H]
+%   \centering
+%   \begin{subfigure}{0.45\linewidth}
+%       \centering
+%       \includegraphics[width=\linewidth]{img/NRBF_Activation_500.png}
+%       \caption{$\gamma=0.5$}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.45\linewidth}
+%       \centering
+%       \includegraphics[width=\linewidth]{img/NRBF_Activation_16.png}
+%       \caption{$\gamma=0.036$}
+%       \label{fig:nrbf-dist-16}
+%   \end{subfigure}
+%   \caption{Hidden layer activation value distribution}
+%   \label{fig:nrbf-dist}
+% \end{figure}
 
-\begin{figure}[H]
-  \centering
-  \begin{subfigure}{0.45\linewidth}
-      \centering
-      \includegraphics[width=\linewidth]{img/NRBF_Activation_500.png}
-      \caption{$\gamma=0.5$}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}{0.45\linewidth}
-      \centering
-      \includegraphics[width=\linewidth]{img/NRBF_Activation_16.png}
-      \caption{$\gamma=0.036$}
-      \label{fig:nrbf-dist-16}
-  \end{subfigure}
-  \caption{Hidden layer activation value distribution}
-  \label{fig:nrbf-dist}
-\end{figure}
-
-We also explored alternative basis functions. Here is the Linear RBF approach:
+We also explored alternative basis functions. Here's the Linear RBF:
+\begin{equation}
+  \phi_k(x)=\gamma \cdot (x-\mu)^T\Sigma_k^{-1}(x-\mu)
+\end{equation}
 
 \begin{figure}[H]
   \centering
@@ -251,7 +293,7 @@ We also explored alternative basis functions. Here is the Linear RBF approach:
   \end{minipage}
 \end{figure}
 
-The Linear RBF implementation showed promising results, often outperforming the Gaussian RBF in terms of both accuracy and stability.
+The Linear RBF implementation showed promising results, outperforming the Gaussian RBF in terms of both accuracy and stability.
 
 \section{Comparative Analysis and Conclusions}
 
@@ -262,18 +304,19 @@ Our comprehensive evaluation of different approaches revealed several key insigh
 \caption{Model Performance Summary}
 \begin{tabular}{@{}lc@{}}
 \toprule
-Model                              & Testing Accuracy \\ \midrule
-Logistic Regression (Standardized) & 98.25\%          \\
-EM Probability Mapping ($k=2$)     & 92.40\%          \\
-Gaussian RBF Network               & 92.40\%          \\
-Normalized Gaussian RBF Network    & 92.96\%          \\
-Linear RBF Network                 & 93.57\%          \\
-Normalized Linear RBF Network      & 93.57\%          \\ \bottomrule
+Model                                           & Testing Accuracy \\ \midrule
+Logistic Regression (Standard Scaling)          & 98.25\%          \\
+EM Probability Mapping ($k=2$)                  & 92.40\%          \\
+Gaussian RBF Network (best $\gamma$ parameter)  & 92.40\%          \\
+Gaussian NRBF Network                           & 92.96\%          \\
+Linear RBF Network                              & 92.40\%          \\
+Linear NRBF Network                             & 93.57\%          \\ \bottomrule
 \end{tabular}
 \end{table}
 
 Key findings from our analysis:
 \begin{itemize}
+  \setlength{\itemsep}{0pt}
     \item Logistic regression's high accuracy (98.25\%) suggests predominantly linear decision boundaries in the feature space
     \item EM clustering successfully reduced dimensionality while preserving most of the discriminative information
     \item The normalized RBF approach demonstrated robust performance across various parameter settings
@@ -281,19 +324,25 @@ Key findings from our analysis:
     \item The dataset exhibits natural binary structure, aligning well with the classification objective
 \end{itemize}
 
+\newpage
+
 The practical implications of our findings include:
 \begin{enumerate}
+  \setlength{\itemsep}{0pt}
     \item EM clustering with k=2 provides an effective approach for dimensionality reduction while maintaining good classification performance
     \item Normalized RBF networks offer stable performance without requiring extensive parameter tuning
     \item Feature standardization consistently improves model performance across different approaches
     \item The choice between methods involves a trade-off between accuracy and computational complexity
 \end{enumerate}
 
-\bibliography{references}
+\begin{thebibliography}{99}
+
+\bibitem{journey} 
 Luis Sa-Couto and Andreas Miroslaus Wichert, 
 \textit{Machine Learning - A Journey To Deep Learning: With Exercises And Answers}, 
 International series of monographs on physics, 
 World Scientific Pub Co Inc, 2021, ISBN: 9789811234057.
-\bibliographystyle{plain}
+
+\end{thebibliography}
 
 \end{document}
